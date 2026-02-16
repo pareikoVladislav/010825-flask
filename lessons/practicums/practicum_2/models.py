@@ -1,11 +1,5 @@
-from datetime import datetime, date, UTC
-from decimal import Decimal
-
-from sqlalchemy import Integer, String, Float, UniqueConstraint, DateTime, ForeignKey, Date, Numeric
-from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-
-from practicums.practicum_2.database_connection import engine
+from sqlalchemy import Integer, String, Float, UniqueConstraint
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
 class Base(DeclarativeBase):
