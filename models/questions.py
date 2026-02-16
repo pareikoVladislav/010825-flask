@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import String, Text, DateTime, Boolean, Integer, ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base import Base
 
@@ -28,6 +28,19 @@ class Question(Base):
     is_active: Mapped[bool] = mapped_column(
         Boolean,
         default=True
+    )
+
+    category_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("categories.id"),
+        nullable=False
+    )
+
+    # category: Mapped["Category"] = relationship(back_populates="questions")
+
+    category = relationship(
+        "Category",
+        back_populates="questions"
     )
 
 
