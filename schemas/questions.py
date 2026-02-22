@@ -22,10 +22,11 @@ class QuestionBase(BaseSchema):
     start_date: datetime
     end_date: datetime
 
+
     @model_validator(mode="after")
     def validate_dates(self):
         if self.start_date > self.end_date:
-            raise ValueError("start_date must be before end_date")
+            raise ValueError("start date must be before end date")
 
         return self
 
@@ -39,15 +40,17 @@ class QuestionUpdateRequest(BaseSchema):
     description: str | None = Field(default=None, min_length=20, max_length=750)
     start_date: datetime | None
     end_date: datetime | None
-    ist_active: bool | None
+    is_active: bool | None
+
 
     @model_validator(mode="after")
     def validate_dates(self):
-        if self.start_date > is not None and self.end_date is not None:
+        if self.start_date is not None and self.end_date is not None:
             if self.start_date > self.end_date:
                 raise ValueError("Start date must be before end date")
 
         return self
+
 
 # Как мы хотим получать один конкретный объект Question
 class QuestionRetrieve(QuestionBase):
@@ -65,5 +68,4 @@ class QuestionList(BaseSchema):
 
 class QuestionCreateResponse(QuestionRetrieve):
     ...
-
 
