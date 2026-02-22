@@ -7,3 +7,4 @@ db = SQLAlchemy()
 __all__ = [
     "db"
 ]
+

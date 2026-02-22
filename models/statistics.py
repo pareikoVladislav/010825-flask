@@ -38,4 +38,3 @@ class OptionStatistics(Base):
 
     # Связи
     question_stats: Mapped["QuestionStatistics"] = relationship(back_populates="option_stats")
-

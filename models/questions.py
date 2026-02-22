@@ -30,6 +30,19 @@ class Question(Base):
         default=True
     )
 
+    category_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("categories.id"),
+        nullable=False
+    )
+
+    # category: Mapped["Category"] = relationship(back_populates="questions")
+
+    category = relationship(
+        "Category",
+        back_populates="questions"
+    )
+
     options: Mapped[list['QuestionOption']] = relationship(
         'QuestionOption',
         back_populates='question',

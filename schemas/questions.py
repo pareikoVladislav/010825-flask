@@ -68,3 +68,4 @@ class QuestionList(BaseSchema):
 
 class QuestionCreateResponse(QuestionRetrieve):
     ...
+
