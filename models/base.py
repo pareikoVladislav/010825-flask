@@ -2,9 +2,11 @@ from typing import Any
 
 from sqlalchemy import Integer
 from sqlalchemy.orm import Mapped, mapped_column
+
 from core.db import db
 
-class Base (db.Model):
+
+class Base(db.Model):  # раз есть db.Model, значит это не обычный python класс. Это модель для Базы Данных
     __abstract__ = True
 
     id: Mapped[int] = mapped_column(
@@ -18,3 +20,5 @@ class Base (db.Model):
             column.name: getattr(self, column.name)
             for column in self.__table__.columns
         }
+
+    # User -> User.to_dict() => => {"id": 1, "name": "Vasya", ...}

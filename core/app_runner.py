@@ -8,13 +8,13 @@ from models import *
 
 
 def init_database(app: Flask):
-    db.init_app(app=app)
+    db.init_app(app)
 
     migrate = Migrate()
     migrate.init_app(app, db)
 
 
-def register_routes(app: Flask):
+def register_routers(app: Flask):
     app.register_blueprint(questions_bp)
 
 
@@ -23,5 +23,4 @@ def create_app(app: Flask):
 
     init_database(app)
 
-    register_routes(app)
-
+    register_routers(app)

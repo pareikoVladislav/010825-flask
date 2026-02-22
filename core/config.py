@@ -5,6 +5,7 @@ from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+# BASE_DIR = Path(__file__).resolve().parents[1]
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -22,7 +23,6 @@ class Settings(BaseSettings):
     mysql_pool_size: int
     mysql_pool_timeout: int
 
-
     # API settings
     api_prefix: str
     api_version: str
@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=BASE_DIR / ".env",
         env_file_encoding="utf-8",
-        case_sensitive=False,
+        case_sensitive=False
     )
 
     @property
@@ -42,7 +42,7 @@ class Settings(BaseSettings):
             password=self.mysql_password.get_secret_value(),
             host=self.mysql_host.get_secret_value(),
             port=self.mysql_port,
-            db_name=self.mysql_database,
+            db_name=self.mysql_database
         )
 
     def get_flask_config(self) -> dict[str, Any]:
@@ -52,13 +52,11 @@ class Settings(BaseSettings):
             "SQLALCHEMY_TRACK_MODIFICATIONS": False,
             "SQLALCHEMY_POOL_SIZE": self.mysql_pool_size,
             "SQLALCHEMY_POOL_TIMEOUT": self.mysql_pool_timeout,
+            "SQLALCHEMY_ECHO": self.debug
         }
 
 
 settings = Settings()
-
-print(settings)
-
 
 
 
