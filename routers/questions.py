@@ -33,22 +33,16 @@ def get_all_questions():
     stmt = select(Question).options(joinedload(Question.category))
     result = db.session.execute(stmt).scalars().unique().all()
 
-    print("RESULT:", result)
-    print("ANY NONE:", any(x is None for x in result))
-
     # 2. Как-то преобразовать сложный объект ORM в простой словарик python
     response = [
         QuestionList.model_validate(obj).model_dump()
         for obj in result
     ]
 
-
-
     # response = []
     #
     # for obj in result:
     #     response.append(obj.to_dict())
-
 
     # 3. вернуть данные как ответ в JSON формате с правильным status code
     return jsonify(response), 200  # 200 OK
