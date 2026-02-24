@@ -16,6 +16,15 @@ class BaseSchema(BaseModel):
     )
 
 
+class CategoryCreateRequest(BaseSchema):
+    name: str = Field(min_length=3, max_length=150)
+
+
+class CategoryBase(BaseSchema):
+    id: int
+    name: str = Field(min_length=3, max_length=150)
+
+
 class QuestionBase(BaseSchema):
     title: str = Field(..., min_length=15, max_length=150)
     description: str | None = Field(default=None, min_length=20, max_length=750)
@@ -32,7 +41,7 @@ class QuestionBase(BaseSchema):
 
 
 class QuestionCreateRequest(QuestionBase):
-    ...
+    category_id: int
 
 
 class QuestionUpdateRequest(BaseSchema):
@@ -56,6 +65,7 @@ class QuestionUpdateRequest(BaseSchema):
 class QuestionRetrieve(QuestionBase):
     id: int
     is_active: bool
+    category: CategoryBase | None
 
 
 # Как мы хотим получать список всех Question
@@ -64,6 +74,7 @@ class QuestionList(BaseSchema):
     title: str
     start_date: datetime
     is_active: bool
+    category: CategoryBase | None
 
 
 class QuestionCreateResponse(QuestionRetrieve):

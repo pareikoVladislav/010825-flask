@@ -1,9 +1,11 @@
+from sqlalchemy.orm import joinedload
+
 from flask import Blueprint, jsonify, request
 from sqlalchemy import select
 from pydantic import ValidationError
 
 from core.db import db
-from models import Question
+from models import Question, Category
 from schemas.questions import (
     QuestionList,
     QuestionRetrieve,
@@ -24,18 +26,23 @@ questions_bp = Blueprint(
 
 
 # Read (list)
-@questions_bp.route("")
+@questions_bp.route("", methods=["GET"])
 def get_all_questions():
     # TODO-LIST:
     # 1. Сдкелть запрос на получения всех оъектов из базы
-    stmt = select(Question)
-    result = db.session.execute(stmt).scalars()
+    stmt = select(Question).options(joinedload(Question.category))
+    result = db.session.execute(stmt).scalars().unique().all()
+
+    print("RESULT:", result)
+    print("ANY NONE:", any(x is None for x in result))
 
     # 2. Как-то преобразовать сложный объект ORM в простой словарик python
     response = [
         QuestionList.model_validate(obj).model_dump()
         for obj in result
     ]
+
+
 
     # response = []
     #
@@ -48,10 +55,14 @@ def get_all_questions():
 
 
 # Read (one by ID)
-@questions_bp.route("/<int:question_id>")
+@questions_bp.route("/<int:question_id>", methods=["GET"])
 def get_question_by_id(question_id: int):
     # 1. Получить один объект
-    stmt = select(Question).where(Question.id == question_id)
+    stmt = (
+        select(Question)
+        .options(joinedload(Question.category))
+        .where(Question.id == question_id)
+    )
     question = db.session.execute(stmt).scalars().one_or_none()
 
     # 2. Проверить, что объект есть в БД
@@ -88,6 +99,12 @@ def create_new_question():
             }
         ), 400
 
+    stmt = select(Category).where(Category.id == validated_data.category_id)
+    category = db.session.execute(stmt).scalars().one_or_none()
+
+    if not category:
+        return jsonify({"error": f"Category with ID {validated_data.category_id} not found"}), 400
+
     try:
         # 3. Попытаться создать новый объект
         new_question = Question(**validated_data.model_dump())
@@ -97,6 +114,15 @@ def create_new_question():
 
         # 5. Применить изменения из сессии в Базу Данных
         db.session.commit()
+
+        stmt = (
+            select(Question)
+            .options(joinedload(Question.category))
+            .where(Question.id == new_question.id)
+        )
+
+        new_question = db.session.execute(stmt).scalars().one()
+
     except Exception as e:
         db.session.rollback()
         return jsonify(
