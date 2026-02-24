@@ -1,43 +1,23 @@
-# на основе облегчённой версии python 3.7.2
-# Наш фундамент
-FROM python:3.7.2-alpine3.8
+FROM debian:12.13-slim
 
-# Метаинфо (с кем можно связаться для консультации по этому образу)
-LABEL maintainer="jeffmshale@gmail.com"
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    curl \
+    ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
-# добавляем переменную окружения на глобальный уровень всего образа.
-# Не в .env файла, а именно глобально на весь образ
-# НИКОГДА НЕ ПЕРЕДАЁМ СЮДА РЕАЛЬНЫЕ ЗНАЧЕНИЯ, СТАВИМ ТОЛЬКО ЗАГЛУШКИ!!!!!
-# Эти переменные можно и в частых случаях нужно переопределять при запуске
-ENV ADMIN="jeff"
 
-# Запускает n команд для:
-# apk update -- подтянуть обновлённые индексы для пакетов
-# apk upgrade -- установит новые апдейты
-# apk add bash -- добавит bash терминал(если его нет)
-# shell формат. Зависит от оболочки. Поддерживат работу с || && | >
-# за счёт этого можно описывать сложные команды. Но есть зависимость
-# от оболочки, нужно быть внимательным
-RUN apk update \
-    && apk upgrade \
-    && apk add bash
-# скопируй всё из точки запуска в некую папку /app (создай её, если ещё нет)
-#COPY <from local> <to image>
-COPY . ./app
+RUN useradd -ms /bin/bash appuser
+WORKDIR /app
+ENV EXAMPLE_LINC=https://example.com \
+    TARGET=/data
+COPY --chown=appuser:appuser datafetcher.sh .
+RUN mkdir -p /data && \
+    chown -R appuser:appuser /data && \
+    chmod +x datafetcher.sh
 
-# похожа на команду COPY, но ADD так же умеет распаковывать архивы,
-# скачивать данные по ссылкам (!!!!! Лучше самому отдельно скачать
-# ресурс, добавить его через COPY !!!!!)
-# ADD <что> <куда(в образ)>
-ADD https://raw.githubusercontent.com/discdiver/pachy-vid/master/sample_vids/vid1.mp4 \
-/my_app_directory
+VOLUME /data
+USER appuser
 
-# создание новой дирректории(папки)
-# этот формат RUN -- exec форма (массив с аргументами)
-# Нет возможности работать с || && | >. Их просто нет.
-# Нет зависимости от оболочки. Команда выполняется напрямую в OS
-RUN ["mkdir", "/a_directory"]
 
-# Определяет команду, которая должна будет запуситься при docker run.
-# То, что мы определяем в CMD на этапе docker run можно переопределить
-CMD ["python", "./my_script.py"]
+ENTRYPOINT ["/app/datafetcher.sh"]
